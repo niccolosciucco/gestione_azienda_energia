@@ -1,4 +1,4 @@
-package bw_team7.gestione_azienda_energia.province.entities;
+package bw_team7.gestione_azienda_energia.stato_fattura.entities;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -7,30 +7,21 @@ import lombok.NoArgsConstructor;
 import java.util.UUID;
 
 @Entity
-@Table(name = "province")
+@Table(name = "stati_fattura")
 @NoArgsConstructor
 @Getter
-public class Provincia {
+public class StatoFattura {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-
     @Column(nullable = false)
     private String nome;
 
-    @Column(nullable = false, length = 2)
-    private String sigla;
-
-    public Provincia(String nome, String sigla) {
+    public StatoFattura(String nome) {
         this.nome = nome;
-        this.sigla = sigla;
     }
 
     public void setNome(String nome) {
         this.nome = nome;
-    }
-
-    public void setSigla(String sigla) {
-        this.sigla = sigla;
     }
 }
