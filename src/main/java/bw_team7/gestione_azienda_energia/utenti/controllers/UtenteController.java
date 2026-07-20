@@ -1,6 +1,7 @@
 package bw_team7.gestione_azienda_energia.utenti.controllers;
 
 import bw_team7.gestione_azienda_energia.utenti.entities.Utente;
+import bw_team7.gestione_azienda_energia.utenti.payloads.UtenteDTO;
 import bw_team7.gestione_azienda_energia.utenti.services.UtenteService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,7 +19,7 @@ public class UtenteController {
     // 1) POST: Creazione di un nuovo utente
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Utente saveUtente(@RequestBody Utente body) {
+    public Utente saveUtente(@RequestBody UtenteDTO body) {
         return utenteService.save(body);
     }
 
@@ -32,7 +33,7 @@ public class UtenteController {
     // 3) PUT: Aggiorna un utente esistente tramite ID
 
     @PutMapping("/{id}")
-    public Utente updateUtente(@PathVariable UUID id, @RequestBody Utente body) {
+    public Utente updateUtente(@PathVariable UUID id, @RequestBody UtenteDTO body) {
         return utenteService.findByIdAndUpdate(id, body);
     }
 
