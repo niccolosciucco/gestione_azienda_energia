@@ -82,4 +82,8 @@ public class ComuneService {
         this.comuneRepository.delete(found);
         log.info("Comune " + id + " eliminato");
     }
+
+    public long count() {
+        return this.comuneRepository.count();
+    }
 }
