@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
+@RestController
+@RequestMapping("/province")
 public class ProvinciaController {
 
     private final ProvinciaService provinciaService;
