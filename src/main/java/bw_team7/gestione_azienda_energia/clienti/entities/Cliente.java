@@ -16,7 +16,7 @@ import java.util.UUID;
 @Getter
 public class Cliente {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
     @Column(name = "ragione_sociale", nullable = false)
     private String ragioneSociale;

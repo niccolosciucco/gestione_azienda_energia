@@ -13,7 +13,7 @@ import java.util.UUID;
 @Getter
 public class Indirizzo {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
     @Column(nullable = false)
     private String via;
