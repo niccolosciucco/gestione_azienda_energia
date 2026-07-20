@@ -1,5 +1,6 @@
 package bw_team7.gestione_azienda_energia.exceptions.exceptionsHandler;
 
+import bw_team7.gestione_azienda_energia.exceptions.custom.BadRequest;
 import bw_team7.gestione_azienda_energia.exceptions.custom.NotFound;
 import bw_team7.gestione_azienda_energia.exceptions.exceptionsDTO.ExceptionDTO;
 import org.springframework.http.HttpStatus;
@@ -14,6 +15,12 @@ public class ExceptionHandler {
     @org.springframework.web.bind.annotation.ExceptionHandler(NotFound.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ExceptionDTO handleNotFound(NotFound ex) {
+        return new ExceptionDTO(LocalDateTime.now(), ex.getMessage());
+    }
+
+    @org.springframework.web.bind.annotation.ExceptionHandler(BadRequest.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ExceptionDTO handleBadRequest(BadRequest ex) {
         return new ExceptionDTO(LocalDateTime.now(), ex.getMessage());
     }
 

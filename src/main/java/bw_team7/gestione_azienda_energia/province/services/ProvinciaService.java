@@ -81,4 +81,13 @@ public class ProvinciaService {
         this.provinciaRepository.delete(found);
         log.info("Provincia " + id + " eliminata");
     }
+
+    public Provincia findByNome(String nome) {
+        return this.provinciaRepository.findByNome(nome)
+                .orElseThrow(() -> new NotFound("Provincia non trovata: " + nome));
+    }
+
+    public long count() {
+        return this.provinciaRepository.count();
+    }
 }
