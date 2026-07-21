@@ -8,15 +8,19 @@ import bw_team7.gestione_azienda_energia.exceptions.custom.BadRequest;
 import bw_team7.gestione_azienda_energia.exceptions.custom.NotFound;
 import bw_team7.gestione_azienda_energia.indirizzi.entities.Indirizzo;
 import bw_team7.gestione_azienda_energia.indirizzi.services.IndirizzoService;
+import jakarta.persistence.criteria.Predicate;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -106,18 +110,36 @@ public class ClienteService {
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortField));
 
         //Filtri
-        if (minFatturato != null) {
-            return this.clienteRepository.findByFatturatoAnnuale(minFatturato, pageable);
-        } else if (dataInserimento != null) {
-            return this.clienteRepository.findByDataInserimento(dataInserimento, pageable);
-        } else if (dataUltimoContatto != null) {
-            return this.clienteRepository.findByDataUltimoContatto(dataUltimoContatto, pageable);
-        } else if (nome != null && !nome.isEmpty()) {
-            return this.clienteRepository.findByRagioneSocialeContainingIgnoreCase(nome, pageable);
-        } else {
-            // Se nessun filtro è passato, restituisce tutti i clienti paginati e ordinati
-            return this.clienteRepository.findAll(pageable);
-        }
+        Specification<Cliente> spec = (root, query, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            // Gestione range fatturato
+            if (minFatturato != null) {
+                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("fatturatoAnnuale"), minFatturato));
+            }
+            if (maxFatturato != null) {
+                predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("fatturatoAnnuale"), maxFatturato));
+            }
+
+            // Filtro per data inserimento
+            if (dataInserimento != null) {
+                predicates.add(criteriaBuilder.equal(root.get("dataInserimento"), dataInserimento));
+            }
+
+            // Filtro per data ultimo contatto
+            if (dataUltimoContatto != null) {
+                predicates.add(criteriaBuilder.equal(root.get("dataUltimoContatto"), dataUltimoContatto));
+            }
+
+            // Filtro per parte del nome (ragione sociale)
+            if (nome != null && !nome.isEmpty()) {
+                predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("ragioneSociale")), "%" + nome.toLowerCase() + "%"));
+            }
+
+            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+        };
+
+        return this.clienteRepository.findAll(spec, pageable);
     }
 
     // FIND BY ID
