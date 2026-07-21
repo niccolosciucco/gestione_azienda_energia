@@ -47,7 +47,7 @@ public class Cliente {
     private String emailContatto;
     @Column(name = "telefono_contatto", nullable = false)
     private String telefonoContatto;
-    @ManyToOne(cascade = CascadeType.ALL, optional = false)
+    @OneToOne(cascade = CascadeType.ALL, optional = false)
     @JoinColumn(name = "sede_legale_id", nullable = false)
     private Indirizzo sedeLegale;
     @OneToOne(cascade = CascadeType.ALL)
