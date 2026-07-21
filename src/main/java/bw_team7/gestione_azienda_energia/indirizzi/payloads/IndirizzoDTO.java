@@ -2,7 +2,6 @@ package bw_team7.gestione_azienda_energia.indirizzi.payloads;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 
 import java.util.UUID;
@@ -19,7 +18,6 @@ public record IndirizzoDTO(
         String località,
 
         @NotNull(message = "Il CAP è obbligatorio")
-        @Positive(message = "Il CAP deve essere un valore positivo")
         String cap,
 
         @NotNull(message = "L'ID del comune è obbligatorio")

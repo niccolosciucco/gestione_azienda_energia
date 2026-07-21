@@ -2,6 +2,7 @@ package bw_team7.gestione_azienda_energia.indirizzi.services;
 
 import bw_team7.gestione_azienda_energia.comuni.entities.Comune;
 import bw_team7.gestione_azienda_energia.comuni.services.ComuneService;
+import bw_team7.gestione_azienda_energia.exceptions.custom.BadRequest;
 import bw_team7.gestione_azienda_energia.exceptions.custom.NotFound;
 import bw_team7.gestione_azienda_energia.indirizzi.entities.Indirizzo;
 import bw_team7.gestione_azienda_energia.indirizzi.payloads.IndirizzoDTO;
@@ -30,6 +31,17 @@ public class IndirizzoService {
     // SAVE
     public Indirizzo save(IndirizzoDTO payload) {
         Comune comune = this.comuneService.findById(payload.comuneId());
+
+        boolean esisteGia = indirizzoRepository.existsByViaAndCivicoAndCapAndComuneId(
+                payload.via(),
+                payload.civico(),
+                payload.cap(),
+                payload.comuneId()
+        );
+
+        if (esisteGia) {
+            throw new BadRequest("Questo indirizzo esiste già nel sistema!");
+        }
 
         Indirizzo newIndirizzo = new Indirizzo(
                 payload.via(),
