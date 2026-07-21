@@ -54,9 +54,7 @@ public class IndirizzoController {
     @PutMapping("/{id}")
     public Indirizzo getByIdAndUpdate(@PathVariable UUID id, @RequestBody @Validated IndirizzoDTO body, BindingResult validationResult) {
         if (validationResult.hasErrors()) {
-            List<String> errorsList = validationResult.getFieldErrors().stream()
-                    .map(fieldError -> fieldError.getDefaultMessage())
-                    .toList();
+            List<String> errorsList = validationResult.getFieldErrors().stream().map(fieldError -> fieldError.getDefaultMessage()).toList();
             throw new BadRequest("Errori di validazione nella modifica: " + errorsList);
         }
         return this.indirizzoService.findByIdAndUpdate(id, body);
