@@ -5,6 +5,9 @@ import bw_team7.gestione_azienda_energia.ruolo.services.RuoloService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/ruoli")
 public class RuoloController {
@@ -13,6 +16,18 @@ public class RuoloController {
 
     public RuoloController(RuoloService ruoloService) {
         this.ruoloService = ruoloService;
+    }
+
+    //Get All
+    @GetMapping
+    public List<Ruolo> getAllRuoli() {
+        return ruoloService.findAll();
+    }
+
+    //Get
+    @GetMapping("/{id}")
+    public Ruolo getRuoloById(@PathVariable UUID id) {
+        return ruoloService.findById(id);
     }
 
     // POST

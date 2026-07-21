@@ -78,4 +78,11 @@ public class UtenteController {
     public void findByIdAndDelete(@PathVariable UUID id) {
         this.utenteService.findByIdAndDelete(id);
     }
+
+    //Patch nuovo ruolo
+    @PatchMapping("/{id}/ruolo")
+    public Utente updateRuoloUtente(@PathVariable UUID id, @RequestParam String nuovoNomeRuolo) {
+        return this.utenteService.updateRuoloUtente(id, nuovoNomeRuolo);
+    }
+
 }
