@@ -42,6 +42,11 @@ public class FatturaService {
         Cliente cliente = this.clienteService.findById(payload.clienteId());
         StatoFattura statoFattura = this.statoFatturaService.findById(payload.statoFatturaId());
 
+        boolean esiste = fatturaRepository.existsByNumeroAndClienteId(payload.numero(), payload.clienteId());
+        if (esiste) {
+            throw new RuntimeException("Esiste già una fattura con numero " + payload.numero() + " per questo cliente!");
+        }
+
         Fattura newFattura = new Fattura(
                 payload.data(),
                 payload.numero(),
