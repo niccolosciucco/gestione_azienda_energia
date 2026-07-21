@@ -89,8 +89,9 @@ public class UtenteService {
         found.setNome(payload.nome());
         found.setCognome(payload.cognome());
 
-        found.setAvatar("https://ui-avatars.com/api/?name=" + payload.nome() + "+" + payload.cognome());
-
+        if (!found.getNome().equals(payload.nome()) || !found.getCognome().equals(payload.cognome()))
+            found.setAvatar("https://ui-avatars.com/api/?name=" + payload.nome() + "+" + payload.cognome());
+        
         Utente updated = this.utenteRepository.save(found);
         log.info("Utente " + updated.getId() + " aggiornato con successo");
         return updated;

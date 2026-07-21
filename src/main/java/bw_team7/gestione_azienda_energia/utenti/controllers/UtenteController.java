@@ -1,49 +1,79 @@
 package bw_team7.gestione_azienda_energia.utenti.controllers;
 
+import bw_team7.gestione_azienda_energia.exceptions.custom.BadRequest;
 import bw_team7.gestione_azienda_energia.utenti.entities.Utente;
 import bw_team7.gestione_azienda_energia.utenti.payloads.UtenteDTO;
 import bw_team7.gestione_azienda_energia.utenti.services.UtenteService;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/utenti")
 public class UtenteController {
 
-    @Autowired
-    private UtenteService utenteService;
+    private final UtenteService utenteService;
 
-    // 1) POST: Creazione di un nuovo utente
+    public UtenteController(UtenteService utenteService) {
+        this.utenteService = utenteService;
+    }
+
+    // GET ALL
+    @GetMapping
+    public Page<Utente> getAll(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id") String orderBy) {
+        return this.utenteService.getAll(page, size, orderBy);
+    }
+
+    // GET BY ID
+    @GetMapping("/{id}")
+    public Utente findById(@PathVariable UUID id) {
+        return this.utenteService.findById(id);
+    }
+
+    // POST
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Utente saveUtente(@RequestBody UtenteDTO body) {
-        return utenteService.save(body);
+    public Utente save(@RequestBody @Validated UtenteDTO body, BindingResult validation) {
+        if (validation.hasErrors()) {
+            String errors = validation.getFieldErrors().stream()
+                    .map(fieldError -> fieldError.getDefaultMessage())
+                    .collect(Collectors.joining(". "));
+
+            throw new BadRequest(errors);
+        }
+        return this.utenteService.save(body);
     }
 
-    // 2) GET: Restituisce un singolo utente tramite ID
-
-    @GetMapping("/{id}")
-    public Utente getUtenteById(@PathVariable UUID id) {
-        return utenteService.findById(id);
-    }
-
-    // 3) PUT: Aggiorna un utente esistente tramite ID
-
+    // PUT
     @PutMapping("/{id}")
-    public Utente updateUtente(@PathVariable UUID id, @RequestBody UtenteDTO body) {
-        return utenteService.findByIdAndUpdate(id, body);
+    public Utente findByIdAndUpdate(@PathVariable UUID id, @RequestBody @Validated UtenteDTO body, BindingResult validation) {
+        if (validation.hasErrors()) {
+            String errors = validation.getFieldErrors().stream()
+                    .map(fieldError -> fieldError.getDefaultMessage())
+                    .collect(Collectors.joining(". "));
+
+            throw new BadRequest(errors);
+        }
+        return this.utenteService.findByIdAndUpdate(id, body);
     }
 
-    // 4) DELETE: Elimina un utente tramite ID
+    // PATCH AVATAR
+//    @PatchMapping("/{id}/avatar")
+//    public Utente updateAvatar(@PathVariable UUID id, @RequestParam("avatar") MultipartFile file) {
+//    }
 
+    // DELETE
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteUtente(@PathVariable UUID id) {
-        utenteService.findByIdAndDelete(id);
+    public void findByIdAndDelete(@PathVariable UUID id) {
+        this.utenteService.findByIdAndDelete(id);
     }
 }
-
-
