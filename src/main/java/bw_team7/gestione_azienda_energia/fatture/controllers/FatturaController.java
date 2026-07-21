@@ -45,7 +45,7 @@ public class FatturaController {
     public Page<Fattura> getAllFatture(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(required = false) Long clienteId,
+            @RequestParam(required = false) UUID clienteId,
             @RequestParam(required = false) String stato,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate data,
             @RequestParam(required = false) Integer anno,
