@@ -1,6 +1,6 @@
 package bw_team7.gestione_azienda_energia.utenti.entities;
 
-import bw_team7.gestione_azienda_energia.utenti.enums.RoleType;
+import bw_team7.gestione_azienda_energia.ruolo.entities.Ruolo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -15,31 +15,38 @@ import java.util.UUID;
 @NoArgsConstructor
 @Getter
 public class Utente {
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
+
     @Column(nullable = false, unique = true)
     private String username;
+
     @Column(nullable = false, unique = true)
     private String email;
+
     @Column(nullable = false)
     @JsonIgnore
     private String password;
+
     @Column(nullable = false)
     private String nome;
+
     @Column(nullable = false)
     private String cognome;
-    private String avatar;
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(
-            name = "utenti_ruoli",
-            joinColumns = @JoinColumn(name = "utente_id")
-    )
-    @Enumerated(EnumType.STRING)
-    @Column(name = "ruolo")
-    private Set<RoleType> ruoli = new HashSet<>();
 
-    public Utente(String username, String email, String password, String nome, String cognome, Set<RoleType> ruoli) {
+    private String avatar;
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "utenti_ruoli",
+            joinColumns = @JoinColumn(name = "utente_id"),
+            inverseJoinColumns = @JoinColumn(name = "ruolo_id")
+    )
+    private Set<Ruolo> ruoli = new HashSet<>();
+
+    public Utente(String username, String email, String password, String nome, String cognome, Set<Ruolo> ruoli) {
         this.username = username;
         this.email = email;
         this.password = password;
@@ -73,7 +80,7 @@ public class Utente {
         this.avatar = avatar;
     }
 
-    public void setRuoli(Set<RoleType> ruoli) {
+    public void setRuoli(Set<Ruolo> ruoli) {
         this.ruoli = ruoli;
     }
 }

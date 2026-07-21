@@ -2,8 +2,9 @@ package bw_team7.gestione_azienda_energia.utenti.services;
 
 import bw_team7.gestione_azienda_energia.exceptions.custom.BadRequest;
 import bw_team7.gestione_azienda_energia.exceptions.custom.NotFound;
+import bw_team7.gestione_azienda_energia.ruolo.entities.Ruolo;
+import bw_team7.gestione_azienda_energia.ruolo.services.RuoloService;
 import bw_team7.gestione_azienda_energia.utenti.entities.Utente;
-import bw_team7.gestione_azienda_energia.utenti.enums.RoleType;
 import bw_team7.gestione_azienda_energia.utenti.payloads.UtenteDTO;
 import bw_team7.gestione_azienda_energia.utenti.repositories.UtenteRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -21,9 +22,11 @@ import java.util.UUID;
 public class UtenteService {
 
     private final UtenteRepository utenteRepository;
+    private final RuoloService ruoloService;
 
-    public UtenteService(UtenteRepository utenteRepository) {
+    public UtenteService(UtenteRepository utenteRepository, RuoloService ruoloService) {
         this.utenteRepository = utenteRepository;
+        this.ruoloService = ruoloService;
     }
 
     // SAVE
@@ -36,7 +39,8 @@ public class UtenteService {
             throw new BadRequest("Lo username " + payload.username() + " è già in uso!");
         }
 
-        Set<RoleType> ruoli = Set.of(RoleType.ROLE_USER);
+        Ruolo ruoloDefault = this.ruoloService.getRuoloUser();
+        Set<Ruolo> ruoli = Set.of(ruoloDefault);
 
         Utente newUtente = new Utente(
                 payload.username(),
@@ -91,7 +95,7 @@ public class UtenteService {
 
         if (!found.getNome().equals(payload.nome()) || !found.getCognome().equals(payload.cognome()))
             found.setAvatar("https://ui-avatars.com/api/?name=" + payload.nome() + "+" + payload.cognome());
-        
+
         Utente updated = this.utenteRepository.save(found);
         log.info("Utente " + updated.getId() + " aggiornato con successo");
         return updated;
