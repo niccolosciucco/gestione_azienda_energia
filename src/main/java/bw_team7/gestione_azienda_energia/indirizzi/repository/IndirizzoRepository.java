@@ -6,4 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.UUID;
 
 public interface IndirizzoRepository extends JpaRepository<Indirizzo, UUID> {
+    boolean existsByViaAndCivicoAndCapAndComuneId(String via, String civico, String cap, UUID comuneId);
 }
