@@ -7,12 +7,14 @@ import bw_team7.gestione_azienda_energia.ruolo.services.RuoloService;
 import bw_team7.gestione_azienda_energia.utenti.entities.Utente;
 import bw_team7.gestione_azienda_energia.utenti.payloads.UtenteDTO;
 import bw_team7.gestione_azienda_energia.utenti.repositories.UtenteRepository;
+import com.cloudinary.Cloudinary;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Set;
 import java.util.UUID;
@@ -23,10 +25,12 @@ public class UtenteService {
 
     private final UtenteRepository utenteRepository;
     private final RuoloService ruoloService;
+    private final Cloudinary cloudinary;
 
-    public UtenteService(UtenteRepository utenteRepository, RuoloService ruoloService) {
+    public UtenteService(UtenteRepository utenteRepository, RuoloService ruoloService, Cloudinary cloudinary) {
         this.utenteRepository = utenteRepository;
         this.ruoloService = ruoloService;
+        this.cloudinary = cloudinary;
     }
 
     // SAVE
@@ -99,6 +103,22 @@ public class UtenteService {
         Utente updated = this.utenteRepository.save(found);
         log.info("Utente " + updated.getId() + " aggiornato con successo");
         return updated;
+    }
+
+    //    PATCH AVATAR
+    public Utente updateAvatar(UUID id, MultipartFile file) {
+        Utente found = this.utenteRepository.findById(id)
+                .orElseThrow(() -> new NotFound("Impossibile aggiornare l'avatar. Utente con id " + id + " non trovato"));
+
+        try {
+            String url = (String) this.cloudinary.uploader().upload(file.getBytes(), com.cloudinary.utils.ObjectUtils.emptyMap()).get("secure_url");
+
+            found.setAvatar(url);
+            return this.utenteRepository.save(found);
+
+        } catch (java.io.IOException e) {
+            throw new RuntimeException("Errore durante il caricamento del file su Cloudinary", e);
+        }
     }
 
     // DELETE

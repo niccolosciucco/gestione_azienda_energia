@@ -66,10 +66,10 @@ public class UtenteController {
         return this.utenteService.findByIdAndUpdate(id, body);
     }
 
-    //     PATCH AVATAR
+    // PATCH AVATAR
     @PatchMapping("/{id}/avatar")
-    public void updateAvatar(@PathVariable UUID id, @RequestParam("avatar") MultipartFile file) {
-
+    public Utente updateAvatar(@PathVariable UUID id, @RequestParam("avatar") MultipartFile file) {
+        return this.utenteService.updateAvatar(id, file);
     }
 
     // DELETE
