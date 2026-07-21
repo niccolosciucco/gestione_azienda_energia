@@ -73,7 +73,7 @@ public class FatturaService {
     public Page<Fattura> getFattureFiltered(
             int page,
             int size,
-            Long clienteId,
+            UUID clienteId,
             String stato,
             LocalDate data,
             Integer anno,
@@ -96,19 +96,24 @@ public class FatturaService {
 
             // Stato
             if (stato != null && !stato.isEmpty()) {
-                predicates.add(criteriaBuilder.equal(criteriaBuilder.lower(root.get("stato")), stato.toLowerCase()));
+                predicates.add(criteriaBuilder.equal(
+                        criteriaBuilder.lower(root.get("statoFattura").get("nome")),
+                        stato.toLowerCase()
+                ));
             }
 
             // Data
-            if (data != null) {
-                predicates.add(criteriaBuilder.equal(root.get("data"), data));
+            if (anno != null) {
+                LocalDate inizioAnno = LocalDate.of(anno, 1, 1);
+                LocalDate fineAnno = LocalDate.of(anno, 12, 31);
+                predicates.add(criteriaBuilder.between(root.get("data"), inizioAnno, fineAnno));
             }
 
             // Anno
             if (anno != null) {
-                predicates.add(criteriaBuilder.equal(
-                        criteriaBuilder.function("year", Integer.class, root.get("data")), anno
-                ));
+                LocalDate inizioAnno = LocalDate.of(anno, 1, 1);
+                LocalDate fineAnno = LocalDate.of(anno, 12, 31);
+                predicates.add(criteriaBuilder.between(root.get("data"), inizioAnno, fineAnno));
             }
 
             // Range di importi
