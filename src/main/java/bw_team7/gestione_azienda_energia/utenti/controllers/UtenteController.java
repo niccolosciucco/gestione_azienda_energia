@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -65,10 +66,11 @@ public class UtenteController {
         return this.utenteService.findByIdAndUpdate(id, body);
     }
 
-    // PATCH AVATAR
-//    @PatchMapping("/{id}/avatar")
-//    public Utente updateAvatar(@PathVariable UUID id, @RequestParam("avatar") MultipartFile file) {
-//    }
+    //     PATCH AVATAR
+    @PatchMapping("/{id}/avatar")
+    public void updateAvatar(@PathVariable UUID id, @RequestParam("avatar") MultipartFile file) {
+
+    }
 
     // DELETE
     @DeleteMapping("/{id}")
