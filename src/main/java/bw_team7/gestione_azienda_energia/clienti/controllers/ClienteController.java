@@ -3,6 +3,7 @@ package bw_team7.gestione_azienda_energia.clienti.controllers;
 import bw_team7.gestione_azienda_energia.clienti.entities.Cliente;
 import bw_team7.gestione_azienda_energia.clienti.payloads.ClienteDTO;
 import bw_team7.gestione_azienda_energia.clienti.services.ClienteService;
+import bw_team7.gestione_azienda_energia.email.payloads.EmailPayloadDTO;
 import bw_team7.gestione_azienda_energia.exceptions.custom.BadRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -79,6 +80,24 @@ public class ClienteController {
             throw new BadRequest("Errori di validazione nella modifica: " + errorsList);
         }
         return this.clienteService.findByIdAndUpdate(id, body);
+    }
+
+    //INVIO EMAIL
+    @PostMapping("/{id}/send-email")
+    @ResponseStatus(HttpStatus.OK)
+    public void sendEmailToCliente(
+            @PathVariable UUID id,
+            @RequestBody @Validated EmailPayloadDTO payload,
+            BindingResult validationResult) {
+
+        if (validationResult.hasErrors()) {
+            List<String> errorsList = validationResult.getFieldErrors().stream()
+                    .map(fieldError -> fieldError.getDefaultMessage())
+                    .toList();
+            throw new BadRequest("Errori nella composizione dell'email: " + errorsList);
+        }
+
+        this.clienteService.sendEmailToContatto(id, payload.subject(), payload.body());
     }
 
     //DELETE

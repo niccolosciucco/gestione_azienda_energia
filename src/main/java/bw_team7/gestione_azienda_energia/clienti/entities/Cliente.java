@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Entity
 @Table(name = "clienti")
@@ -54,15 +55,16 @@ public class Cliente {
     @JoinColumn(name = "sede_operativa_id")
     private Indirizzo sedeOperativa;
 
-    public Cliente(String ragioneSociale, String partitaIva, TipoCliente tipoCliente, String email, String pec, String telefono, LocalDate dataInserimento, LocalDate dataUltimoContatto, BigDecimal fatturatoAnnuale, String nomeContatto, String cognomeContatto, String emailContatto, String telefonoContatto, Indirizzo sedeLegale, Indirizzo sedeOperativa) {
+    public Cliente(String ragioneSociale, String partitaIva, TipoCliente tipoCliente, String email, String pec, String telefono, BigDecimal fatturatoAnnuale, String nomeContatto, String cognomeContatto, String emailContatto, String telefonoContatto, Indirizzo sedeLegale, Indirizzo sedeOperativa) {
         this.ragioneSociale = ragioneSociale;
         this.partitaIva = partitaIva;
         this.tipoCliente = tipoCliente;
         this.email = email;
         this.pec = pec;
         this.telefono = telefono;
-        this.dataInserimento = dataInserimento;
-        this.dataUltimoContatto = dataUltimoContatto;
+        long giorniCasuali = ThreadLocalRandom.current().nextLong(1, 366);
+        this.dataInserimento = LocalDate.now().minusDays(giorniCasuali);
+        this.dataUltimoContatto = null;
         this.fatturatoAnnuale = fatturatoAnnuale;
         this.nomeContatto = nomeContatto;
         this.cognomeContatto = cognomeContatto;

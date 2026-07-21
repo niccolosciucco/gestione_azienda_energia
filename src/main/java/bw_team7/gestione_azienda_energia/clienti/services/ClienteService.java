@@ -4,6 +4,7 @@ import bw_team7.gestione_azienda_energia.clienti.entities.Cliente;
 import bw_team7.gestione_azienda_energia.clienti.enums.TipoCliente;
 import bw_team7.gestione_azienda_energia.clienti.payloads.ClienteDTO;
 import bw_team7.gestione_azienda_energia.clienti.repositories.ClienteRepository;
+import bw_team7.gestione_azienda_energia.email.MailgunSender;
 import bw_team7.gestione_azienda_energia.exceptions.custom.BadRequest;
 import bw_team7.gestione_azienda_energia.exceptions.custom.NotFound;
 import bw_team7.gestione_azienda_energia.indirizzi.entities.Indirizzo;
@@ -30,9 +31,12 @@ public class ClienteService {
     private final ClienteRepository clienteRepository;
     private final IndirizzoService indirizzoService;
 
-    public ClienteService(ClienteRepository clienteRepository, IndirizzoService indirizzoService) {
+    private final MailgunSender mailgunSender;
+
+    public ClienteService(ClienteRepository clienteRepository, IndirizzoService indirizzoService, MailgunSender mailgunSender) {
         this.clienteRepository = clienteRepository;
         this.indirizzoService = indirizzoService;
+        this.mailgunSender = mailgunSender;
     }
 
     // SAVE
@@ -58,8 +62,6 @@ public class ClienteService {
                 payload.email(),
                 payload.pec(),
                 payload.telefono(),
-                payload.dataInserimento(),
-                payload.dataUltimoContatto(),
                 payload.fatturatoAnnuale(),
                 payload.nomeContatto(),
                 payload.cognomeContatto(),
@@ -174,8 +176,10 @@ public class ClienteService {
         found.setEmail(payload.email());
         found.setPec(payload.pec());
         found.setTelefono(payload.telefono());
-        found.setDataInserimento(payload.dataInserimento());
-        found.setDataUltimoContatto(payload.dataUltimoContatto());
+        if (payload.dataInserimento() != found.getDataInserimento())
+            found.setDataInserimento(payload.dataInserimento());
+        if (payload.dataUltimoContatto() != found.getDataUltimoContatto())
+            found.setDataUltimoContatto(payload.dataUltimoContatto());
         found.setFatturatoAnnuale(payload.fatturatoAnnuale());
         found.setNomeContatto(payload.nomeContatto());
         found.setCognomeContatto(payload.cognomeContatto());
@@ -187,6 +191,25 @@ public class ClienteService {
         Cliente updated = this.clienteRepository.save(found);
         log.info("Cliente " + updated.getId() + " aggiornato con successo");
         return updated;
+    }
+
+    public void sendEmailToContatto(UUID clienteId, String subject, String body) {
+        Cliente cliente = this.findById(clienteId);
+        String emailDestinatario = cliente.getEmailContatto();
+
+        //Da eliminare
+        emailDestinatario = "sciucco.niccolo@gmail.com";
+
+        if (emailDestinatario == null || emailDestinatario.isBlank()) {
+            throw new BadRequest("Il cliente selezionato non ha un'email di contatto valida!");
+        }
+
+        this.mailgunSender.sendEmail(emailDestinatario, subject, body);
+
+        cliente.setDataUltimoContatto(LocalDate.now());
+        this.clienteRepository.save(cliente);
+
+        log.info("Email inviata con successo e data ultimo contatto aggiornata per il cliente: " + clienteId);
     }
 
     // DELETE
