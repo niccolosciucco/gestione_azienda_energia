@@ -5,11 +5,14 @@ import bw_team7.gestione_azienda_energia.clienti.payloads.ClienteDTO;
 import bw_team7.gestione_azienda_energia.clienti.services.ClienteService;
 import bw_team7.gestione_azienda_energia.exceptions.custom.BadRequest;
 import org.springframework.data.domain.Page;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -41,9 +44,23 @@ public class ClienteController {
     public Page<Cliente> getClienti(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "id") String orderBy
+            @RequestParam(defaultValue = "ragioneSociale") String sortBy,
+            @RequestParam(required = false) BigDecimal minFatturato,
+            @RequestParam(required = false) BigDecimal maxFatturato,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataInserimento,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataUltimoContatto,
+            @RequestParam(required = false) String nome
     ) {
-        return this.clienteService.getAll(page, size, orderBy);
+        return this.clienteService.getFilteredAndSorted(
+                page,
+                size,
+                sortBy,
+                minFatturato,
+                maxFatturato,
+                dataInserimento,
+                dataUltimoContatto,
+                nome
+        );
     }
 
     //GET

@@ -8,13 +8,19 @@ import bw_team7.gestione_azienda_energia.fatture.payloads.FatturaDTO;
 import bw_team7.gestione_azienda_energia.fatture.repositories.FatturaRepository;
 import bw_team7.gestione_azienda_energia.stato_fattura.entities.StatoFattura;
 import bw_team7.gestione_azienda_energia.stato_fattura.services.StatoFatturaService;
+import jakarta.persistence.criteria.Predicate;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -56,6 +62,62 @@ public class FatturaService {
         if (page < 0) page = 0;
         Pageable pageable = PageRequest.of(page, size, Sort.by(orderBy));
         return this.fatturaRepository.findAll(pageable);
+    }
+
+    //GET con filtri
+    public Page<Fattura> getFattureFiltered(
+            int page,
+            int size,
+            Long clienteId,
+            String stato,
+            LocalDate data,
+            Integer anno,
+            BigDecimal minImporto,
+            BigDecimal maxImporto
+    ) {
+        if (size > 50) size = 50;
+        if (size <= 0) size = 10;
+        if (page < 0) page = 0;
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("data").descending());
+
+        Specification<Fattura> spec = (root, query, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            // Cliente
+            if (clienteId != null) {
+                predicates.add(criteriaBuilder.equal(root.get("cliente").get("id"), clienteId));
+            }
+
+            // Stato
+            if (stato != null && !stato.isEmpty()) {
+                predicates.add(criteriaBuilder.equal(criteriaBuilder.lower(root.get("stato")), stato.toLowerCase()));
+            }
+
+            // Data
+            if (data != null) {
+                predicates.add(criteriaBuilder.equal(root.get("data"), data));
+            }
+
+            // Anno
+            if (anno != null) {
+                predicates.add(criteriaBuilder.equal(
+                        criteriaBuilder.function("year", Integer.class, root.get("data")), anno
+                ));
+            }
+
+            // Range di importi
+            if (minImporto != null) {
+                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("importo"), minImporto));
+            }
+            if (maxImporto != null) {
+                predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("importo"), maxImporto));
+            }
+
+            return criteriaBuilder.and(predicates.toArray(new jakarta.persistence.criteria.Predicate[0]));
+        };
+
+        return this.fatturaRepository.findAll(spec, pageable);
     }
 
     // FIND BY ID
