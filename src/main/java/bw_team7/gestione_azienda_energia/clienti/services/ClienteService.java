@@ -15,6 +15,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Service
@@ -75,6 +77,47 @@ public class ClienteService {
         if (page < 0) page = 0;
         Pageable pageable = PageRequest.of(page, size, Sort.by(orderBy));
         return this.clienteRepository.findAll(pageable);
+    }
+
+    //GET filtri e ordinamento
+    public Page<Cliente> getFilteredAndSorted(
+            int page,
+            int size,
+            String sortBy,
+            BigDecimal minFatturato,
+            BigDecimal maxFatturato,
+            LocalDate dataInserimento,
+            LocalDate dataUltimoContatto,
+            String nome
+    ) {
+        if (size > 50) size = 50;
+        if (size < 0) size = 10;
+        if (page < 0) page = 0;
+
+        //Ordinamento
+        String sortField = switch (sortBy.toLowerCase()) {
+            case "fatturato", "fatturatoannuale" -> "fatturatoAnnuale";
+            case "datainserimento" -> "dataInserimento";
+            case "dataultimocontatto" -> "dataUltimoContatto";
+            case "provincia" -> "sedeLegale.comune.provincia.nome"; // Ordina per provincia della sede legale
+            default -> "ragioneSociale"; // Default: Nome ragione sociale
+        };
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortField));
+
+        //Filtri
+        if (minFatturato != null) {
+            return this.clienteRepository.findByFatturatoAnnuale(minFatturato, pageable);
+        } else if (dataInserimento != null) {
+            return this.clienteRepository.findByDataInserimento(dataInserimento, pageable);
+        } else if (dataUltimoContatto != null) {
+            return this.clienteRepository.findByDataUltimoContatto(dataUltimoContatto, pageable);
+        } else if (nome != null && !nome.isEmpty()) {
+            return this.clienteRepository.findByRagioneSocialeContainingIgnoreCase(nome, pageable);
+        } else {
+            // Se nessun filtro è passato, restituisce tutti i clienti paginati e ordinati
+            return this.clienteRepository.findAll(pageable);
+        }
     }
 
     // FIND BY ID
