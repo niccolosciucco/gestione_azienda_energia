@@ -5,11 +5,14 @@ import bw_team7.gestione_azienda_energia.fatture.entities.Fattura;
 import bw_team7.gestione_azienda_energia.fatture.payloads.FatturaDTO;
 import bw_team7.gestione_azienda_energia.fatture.services.FatturaService;
 import org.springframework.data.domain.Page;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -36,21 +39,36 @@ public class FatturaController {
         return this.fatturaService.save(body);
     }
 
-    // GET
+
+    //GET Filtri
     @GetMapping
-    public Page<Fattura> getFatture(
+    public Page<Fattura> getAllFatture(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "id") String orderBy
+            @RequestParam(required = false) Long clienteId,
+            @RequestParam(required = false) String stato,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate data,
+            @RequestParam(required = false) Integer anno,
+            @RequestParam(required = false) BigDecimal minImporto,
+            @RequestParam(required = false) BigDecimal maxImporto
     ) {
-        return this.fatturaService.getAll(page, size, orderBy);
+        return fatturaService.getFattureFiltered(
+                page,
+                size,
+                clienteId,
+                stato,
+                data,
+                anno,
+                minImporto, maxImporto
+        );
     }
 
-    // GET
+    // GET ID
     @GetMapping("/{id}")
     public Fattura getById(@PathVariable UUID id) {
         return this.fatturaService.findById(id);
     }
+
 
     // PUT
     @PutMapping("/{id}")
