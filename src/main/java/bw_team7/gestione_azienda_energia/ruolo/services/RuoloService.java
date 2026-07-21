@@ -6,6 +6,7 @@ import bw_team7.gestione_azienda_energia.ruolo.repositories.RuoloRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -34,8 +35,15 @@ public class RuoloService {
                 .orElseThrow(() -> new NotFound("Ruolo con ID " + id + " non trovato!"));
     }
 
-    // Salva un nuovo ruolo nel database
+    // Save
     public Ruolo save(Ruolo ruolo) {
+
+        Optional<Ruolo> esistente = this.ruoloRepository.findByNome(ruolo.getNome());
+
+        if (esistente.isPresent()) {
+            return esistente.get();
+        }
+
         return this.ruoloRepository.save(ruolo);
     }
 

@@ -127,4 +127,20 @@ public class UtenteService {
         this.utenteRepository.delete(found);
         log.info("Utente " + id + " eliminato con successo");
     }
+
+    //Cambia ruolo utente
+    public Utente updateRuoloUtente(UUID id, String nuovoNomeRuolo) {
+        Utente found = this.findById(id);
+
+        // Trova il nuovo ruolo tramite il RuoloService
+        Ruolo ruoloDaAggiungere = this.ruoloService.findByNome(nuovoNomeRuolo);
+
+        // Assegna il nuovo ruolo
+        found.getRuoli().add(ruoloDaAggiungere);
+
+        Utente updated = this.utenteRepository.save(found);
+        log.info("Ruolo dell'utente " + updated.getId() + " aggiornato a: " + nuovoNomeRuolo);
+        return updated;
+    }
+
 }
