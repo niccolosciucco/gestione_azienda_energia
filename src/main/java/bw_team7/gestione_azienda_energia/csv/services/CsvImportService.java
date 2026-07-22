@@ -12,10 +12,28 @@ import org.springframework.stereotype.Service;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 @Slf4j
 public class CsvImportService {
+
+    private static final Map<String, String> ALIAS_PROVINCIA = new HashMap<>();
+
+    static {
+        ALIAS_PROVINCIA.put("Ascoli Piceno", "Ascoli-Piceno");
+        ALIAS_PROVINCIA.put("Bolzano/Bozen", "Bolzano");
+        ALIAS_PROVINCIA.put("Forlì-Cesena", "Forli-Cesena");
+        ALIAS_PROVINCIA.put("La Spezia", "La-Spezia");
+        ALIAS_PROVINCIA.put("Monza e della Brianza", "Monza-Brianza");
+        ALIAS_PROVINCIA.put("Pesaro e Urbino", "Pesaro-Urbino");
+        ALIAS_PROVINCIA.put("Reggio Calabria", "Reggio-Calabria");
+        ALIAS_PROVINCIA.put("Reggio nell'Emilia", "Reggio-Emilia");
+        ALIAS_PROVINCIA.put("Vibo Valentia", "Vibo-Valentia");
+        ALIAS_PROVINCIA.put("Valle d'Aosta/Vallée d'Aoste", "Aosta");
+        ALIAS_PROVINCIA.put("Verbano-Cusio-Ossola", "Verbania");
+    }
 
     private final ProvinciaService provinciaService;
     private final ComuneService comuneService;
@@ -39,13 +57,12 @@ public class CsvImportService {
 
     private void importaProvince() {
         try {
-            // Localizza il file
             ClassPathResource resource = new ClassPathResource("csv/province-italiane.csv");
 
             // Apre il file in lettura impostando esplicitamente la codifica UTF-8 per i caratteri speciali
             try (BufferedReader br = new BufferedReader(new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8))) {
                 String line;           // Variabile temporanea per memorizzare la riga corrente del file
-                boolean isFirstLine = true; // Flag per identificare la prima riga del fil)
+                boolean isFirstLine = true; // Flag per identificare la prima riga del file
                 int count = 0;         // Contatore per tracciare il numero di province salvate con successo
 
                 // Ciclo che legge il file riga per riga
@@ -65,6 +82,14 @@ public class CsvImportService {
                         String sigla = parts[0].trim();
                         String nome = parts[1].trim();
 
+
+                        if (sigla.length() > 2) {
+                            String siglaCorretta = correggiSigla(nome, sigla);
+                            log.warn("Sigla non valida '" + sigla + "' per la provincia " + nome
+                                    + ": corretta in '" + siglaCorretta + "'");
+                            sigla = siglaCorretta;
+                        }
+
                         ProvinciaDTO dto = new ProvinciaDTO(nome, sigla);
                         try {
                             provinciaService.save(dto);
@@ -74,11 +99,32 @@ public class CsvImportService {
                         }
                     }
                 }
+
+                try {
+                    provinciaService.findByNome("Sud Sardegna");
+                } catch (Exception e) {
+                    try {
+                        provinciaService.save(new ProvinciaDTO("Sud Sardegna", "SU"));
+                        count++;
+                        log.info("Provincia 'Sud Sardegna' non presente nel CSV: aggiunta manualmente.");
+                    } catch (Exception saveEx) {
+                        log.warn("Impossibile creare manualmente la provincia 'Sud Sardegna': " + saveEx.getMessage());
+                    }
+                }
+
                 log.info("Importate " + count + " province.");
             }
         } catch (Exception e) {
             log.error("Errore durante l'importazione delle Province: " + e.getMessage());
         }
+    }
+
+
+    private String correggiSigla(String nomeProvincia, String siglaLetta) {
+        if ("Roma".equalsIgnoreCase(nomeProvincia)) {
+            return "RM";
+        }
+        return siglaLetta.substring(0, 2).toUpperCase();
     }
 
     private void importaComuni() {
@@ -104,8 +150,10 @@ public class CsvImportService {
                         String nomeComune = parts[2].trim();
                         String nomeProvincia = parts[3].trim();
 
+                        String nomeProvinciaDaCercare = ALIAS_PROVINCIA.getOrDefault(nomeProvincia, nomeProvincia);
+
                         try {
-                            Provincia provincia = provinciaService.findByNome(nomeProvincia);
+                            Provincia provincia = provinciaService.findByNome(nomeProvinciaDaCercare);
                             ComuneDTO dto = new ComuneDTO(nomeComune, provincia.getId());
                             comuneService.save(dto);
                             count++;

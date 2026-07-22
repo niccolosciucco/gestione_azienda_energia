@@ -35,9 +35,6 @@ public class ProvinciaService {
         );
 
         Provincia saved = this.provinciaRepository.save(newProvincia);
-
-        log.info("Provincia " + saved.getId() + " salvata");
-
         return saved;
     }
 

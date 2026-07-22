@@ -37,8 +37,6 @@ public class ComuneService {
 
         Comune newComune = new Comune(payload.nome(), provincia);
         Comune saved = this.comuneRepository.save(newComune);
-
-        log.info("Comune " + saved.getNome() + " salvato");
         return saved;
     }
 
