@@ -6,6 +6,7 @@ import bw_team7.gestione_azienda_energia.stato_fattura.payloads.StatoFatturaDTO;
 import bw_team7.gestione_azienda_energia.stato_fattura.services.StatoFatturaService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -23,9 +24,10 @@ public class StatoFatturaController {
         this.statoFatturaService = statoFatturaService;
     }
 
-    // 1. POST
+    // POST - Creazione Stato Fattura: Solo ADMIN
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public StatoFattura saveStatoFattura(@RequestBody @Validated StatoFatturaDTO body, BindingResult validationResult) {
         if (validationResult.hasErrors()) {
             List<String> errorsList = validationResult.getFieldErrors().stream()
@@ -36,8 +38,9 @@ public class StatoFatturaController {
         return this.statoFatturaService.save(body);
     }
 
-    // GET
+    // GET ALL - Lettura Stati Fattura: ADMIN e USER
     @GetMapping
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER')")
     public Page<StatoFattura> getStatiFattura(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -46,14 +49,16 @@ public class StatoFatturaController {
         return this.statoFatturaService.getAll(page, size, orderBy);
     }
 
-    // GET
+    // GET BY ID - Lettura Singolo Stato Fattura: ADMIN e USER
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER')")
     public StatoFattura getById(@PathVariable UUID id) {
         return this.statoFatturaService.findById(id);
     }
 
-    // PUT
+    // PUT - Modifica Stato Fattura: Solo ADMIN
     @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public StatoFattura getByIdAndUpdate(@PathVariable UUID id, @RequestBody @Validated StatoFatturaDTO body, BindingResult validationResult) {
         if (validationResult.hasErrors()) {
             List<String> errorsList = validationResult.getFieldErrors().stream()
@@ -64,9 +69,10 @@ public class StatoFatturaController {
         return this.statoFatturaService.findByIdAndUpdate(id, body);
     }
 
-    // DELETE
+    // DELETE - Cancellazione Stato Fattura: Solo ADMIN
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public void getByIdAndDelete(@PathVariable UUID id) {
         this.statoFatturaService.findByIdAndDelete(id);
     }

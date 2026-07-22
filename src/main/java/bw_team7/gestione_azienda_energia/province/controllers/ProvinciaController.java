@@ -6,6 +6,7 @@ import bw_team7.gestione_azienda_energia.province.payloads.ProvinciaDTO;
 import bw_team7.gestione_azienda_energia.province.services.ProvinciaService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -23,9 +24,10 @@ public class ProvinciaController {
         this.provinciaService = provinciaService;
     }
 
-    // POST
+    // POST - Creazione Provincia: Solo ADMIN
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public Provincia saveProvincia(@RequestBody @Validated ProvinciaDTO payload, BindingResult validationResult) {
         if (validationResult.hasErrors()) {
             List<String> errorsList = validationResult.getFieldErrors().stream().map(fieldError -> fieldError.getDefaultMessage()).toList();
@@ -34,8 +36,9 @@ public class ProvinciaController {
         return this.provinciaService.save(payload);
     }
 
-    //GET
+    // GET ALL - Lettura Province: ADMIN e USER
     @GetMapping
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER')")
     public Page<Provincia> getProvincia(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -44,13 +47,16 @@ public class ProvinciaController {
         return this.provinciaService.getAll(page, size, orderBy);
     }
 
+    // GET BY ID - Lettura Singola Provincia: ADMIN e USER
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER')")
     public Provincia getById(@PathVariable UUID id) {
         return this.provinciaService.findById(id);
     }
 
-    //PUT
+    // PUT - Modifica Provincia: Solo ADMIN
     @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public Provincia getByIdAndUpdate(@PathVariable UUID id, @RequestBody @Validated ProvinciaDTO body, BindingResult validationResult) {
         if (validationResult.hasErrors()) {
             List<String> errorsList = validationResult.getFieldErrors().stream().map(fieldError -> fieldError.getDefaultMessage()).toList();
@@ -59,9 +65,10 @@ public class ProvinciaController {
         return this.provinciaService.findByIdAndUpdate(id, body);
     }
 
-    //DELETE
+    // DELETE - Cancellazione Provincia: Solo ADMIN
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public void getByIdAndDelete(@PathVariable UUID id) {
         this.provinciaService.findByIdAndDelete(id);
     }

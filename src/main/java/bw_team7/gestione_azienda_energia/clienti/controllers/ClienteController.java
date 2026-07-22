@@ -8,6 +8,7 @@ import bw_team7.gestione_azienda_energia.exceptions.custom.BadRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -27,9 +28,10 @@ public class ClienteController {
         this.clienteService = clienteService;
     }
 
-    //POST
+    // POST - Solo ADMIN
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public Cliente saveCliente(@RequestBody @Validated ClienteDTO body, BindingResult validationResult) {
         if (validationResult.hasErrors()) {
             List<String> errorsList = validationResult.getFieldErrors().stream()
@@ -40,8 +42,9 @@ public class ClienteController {
         return this.clienteService.save(body);
     }
 
-    //GET
+    // GET LIST - ADMIN e USER
     @GetMapping
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER')")
     public Page<Cliente> getClienti(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -53,25 +56,20 @@ public class ClienteController {
             @RequestParam(required = false) String nome
     ) {
         return this.clienteService.getFilteredAndSorted(
-                page,
-                size,
-                sortBy,
-                minFatturato,
-                maxFatturato,
-                dataInserimento,
-                dataUltimoContatto,
-                nome
+                page, size, sortBy, minFatturato, maxFatturato, dataInserimento, dataUltimoContatto, nome
         );
     }
 
-    //GET
+    // GET BY ID - ADMIN e USER
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER')")
     public Cliente getById(@PathVariable UUID id) {
         return this.clienteService.findById(id);
     }
 
-    //PUT
+    // PUT - Solo ADMIN
     @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public Cliente getByIdAndUpdate(@PathVariable UUID id, @RequestBody @Validated ClienteDTO body, BindingResult validationResult) {
         if (validationResult.hasErrors()) {
             List<String> errorsList = validationResult.getFieldErrors().stream()
@@ -82,9 +80,10 @@ public class ClienteController {
         return this.clienteService.findByIdAndUpdate(id, body);
     }
 
-    //INVIO EMAIL
+    // INVIO EMAIL - ADMIN e USER
     @PostMapping("/{id}/send-email")
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER')")
     public void sendEmailToCliente(
             @PathVariable UUID id,
             @RequestBody @Validated EmailPayloadDTO payload,
@@ -100,11 +99,11 @@ public class ClienteController {
         this.clienteService.sendEmailToContatto(id, payload.subject(), payload.body());
     }
 
-    //DELETE
+    // DELETE - Solo ADMIN
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public void getByIdAndDelete(@PathVariable UUID id) {
         this.clienteService.findByIdAndDelete(id);
     }
-
 }
