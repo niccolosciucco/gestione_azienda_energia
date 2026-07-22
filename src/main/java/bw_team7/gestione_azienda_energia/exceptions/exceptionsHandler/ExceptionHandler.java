@@ -2,6 +2,7 @@ package bw_team7.gestione_azienda_energia.exceptions.exceptionsHandler;
 
 import bw_team7.gestione_azienda_energia.exceptions.custom.BadRequest;
 import bw_team7.gestione_azienda_energia.exceptions.custom.NotFound;
+import bw_team7.gestione_azienda_energia.exceptions.custom.Unauthorized;
 import bw_team7.gestione_azienda_energia.exceptions.exceptionsDTO.ExceptionDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -21,6 +22,12 @@ public class ExceptionHandler {
     @org.springframework.web.bind.annotation.ExceptionHandler(BadRequest.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ExceptionDTO handleBadRequest(BadRequest ex) {
+        return new ExceptionDTO(LocalDateTime.now(), ex.getMessage());
+    }
+
+    @org.springframework.web.bind.annotation.ExceptionHandler(Unauthorized.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ExceptionDTO handleUnauthorized(Unauthorized ex) {
         return new ExceptionDTO(LocalDateTime.now(), ex.getMessage());
     }
 

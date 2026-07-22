@@ -13,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -26,11 +27,13 @@ public class UtenteService {
     private final UtenteRepository utenteRepository;
     private final RuoloService ruoloService;
     private final Cloudinary cloudinary;
+    private final PasswordEncoder passwordEncoder;
 
-    public UtenteService(UtenteRepository utenteRepository, RuoloService ruoloService, Cloudinary cloudinary) {
+    public UtenteService(UtenteRepository utenteRepository, RuoloService ruoloService, Cloudinary cloudinary, PasswordEncoder passwordEncoder) {
         this.utenteRepository = utenteRepository;
         this.ruoloService = ruoloService;
         this.cloudinary = cloudinary;
+        this.passwordEncoder = passwordEncoder;
     }
 
     // SAVE
@@ -49,7 +52,7 @@ public class UtenteService {
         Utente newUtente = new Utente(
                 payload.username(),
                 payload.email(),
-                payload.password(),
+                this.passwordEncoder.encode(payload.password()),
                 payload.nome(),
                 payload.cognome(),
                 ruoli
@@ -73,6 +76,12 @@ public class UtenteService {
     public Utente findById(UUID id) {
         return this.utenteRepository.findById(id)
                 .orElseThrow(() -> new NotFound("L'utente con ID " + id + " non è stato trovato!"));
+    }
+
+    // FIND BY EMAIL
+    public Utente findByEmail(String email) {
+        return this.utenteRepository.findByEmail(email)
+                .orElseThrow(() -> new NotFound("L'utente con email " + email + " non è stato trovato!"));
     }
 
     // UPDATE
