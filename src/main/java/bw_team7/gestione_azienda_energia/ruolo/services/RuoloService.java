@@ -1,15 +1,17 @@
 package bw_team7.gestione_azienda_energia.ruolo.services;
 
+import bw_team7.gestione_azienda_energia.exceptions.custom.BadRequest;
 import bw_team7.gestione_azienda_energia.exceptions.custom.NotFound;
 import bw_team7.gestione_azienda_energia.ruolo.entities.Ruolo;
 import bw_team7.gestione_azienda_energia.ruolo.repositories.RuoloRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
+@Slf4j
 public class RuoloService {
 
     private final RuoloRepository ruoloRepository;
@@ -36,15 +38,22 @@ public class RuoloService {
     }
 
     // Save
-    public Ruolo save(Ruolo ruolo) {
+    public Ruolo save(Ruolo payload) {
+        boolean esiste = ruoloRepository.existsByNome(
+                payload.getNome()
+        );
 
-        Optional<Ruolo> esistente = this.ruoloRepository.findByNome(ruolo.getNome());
-
-        if (esistente.isPresent()) {
-            return esistente.get();
+        if (esiste) {
+            throw new BadRequest("Questo ruolo esiste già nel sistema!");
         }
 
-        return this.ruoloRepository.save(ruolo);
+        Ruolo newRuolo = new Ruolo(
+                payload.getNome()
+        );
+
+        Ruolo saved = this.ruoloRepository.save(newRuolo);
+        log.info("Indirizzo " + saved.getId() + " salvato");
+        return saved;
     }
 
     // Recupera tutti i ruoli presenti

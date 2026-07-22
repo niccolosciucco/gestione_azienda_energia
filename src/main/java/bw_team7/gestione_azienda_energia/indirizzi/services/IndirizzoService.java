@@ -32,14 +32,14 @@ public class IndirizzoService {
     public Indirizzo save(IndirizzoDTO payload) {
         Comune comune = this.comuneService.findById(payload.comuneId());
 
-        boolean esisteGia = indirizzoRepository.existsByViaAndCivicoAndCapAndComuneId(
+        boolean esiste = indirizzoRepository.existsByViaAndCivicoAndCapAndComuneId(
                 payload.via(),
                 payload.civico(),
                 payload.cap(),
                 payload.comuneId()
         );
 
-        if (esisteGia) {
+        if (esiste) {
             throw new BadRequest("Questo indirizzo esiste già nel sistema!");
         }
 
