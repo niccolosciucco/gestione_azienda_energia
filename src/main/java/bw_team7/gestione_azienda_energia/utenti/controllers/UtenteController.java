@@ -85,4 +85,12 @@ public class UtenteController {
         return this.utenteService.updateRuoloUtente(id, nuovoNomeRuolo);
     }
 
+    @DeleteMapping("/{id}/ruolo")
+    public Utente removeRuoloUtente(
+            @PathVariable UUID id,
+            @RequestParam(name = "nomeRuolo") String nomeRuolo) {
+
+        return this.utenteService.removeRuoloUtente(id, nomeRuolo);
+    }
+
 }

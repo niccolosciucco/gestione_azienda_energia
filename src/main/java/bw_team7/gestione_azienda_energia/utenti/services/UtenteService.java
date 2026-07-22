@@ -143,4 +143,14 @@ public class UtenteService {
         return updated;
     }
 
+    //Rimuovere ruolo
+    public Utente removeRuoloUtente(UUID id, String nomeRuoloDaRimuovere) {
+        Utente found = this.findById(id);
+
+        // Rimuove il ruolo dalla lista basandosi sul nome
+        found.getRuoli().removeIf(ruolo -> ruolo.getNome().equalsIgnoreCase(nomeRuoloDaRimuovere));
+
+        return this.utenteRepository.save(found);
+    }
+
 }
