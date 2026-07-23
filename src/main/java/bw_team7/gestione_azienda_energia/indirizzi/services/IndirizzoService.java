@@ -46,7 +46,7 @@ public class IndirizzoService {
         Indirizzo newIndirizzo = new Indirizzo(
                 payload.via(),
                 payload.civico(),
-                payload.località(),
+                payload.localita(),
                 payload.cap(),
                 comune
         );
@@ -79,7 +79,7 @@ public class IndirizzoService {
 
         found.setVia(payload.via());
         found.setCivico(payload.civico());
-        found.setLocalita(payload.località());
+        found.setLocalita(payload.localita());
         found.setCap(payload.cap());
         found.setComune(comune);
 
