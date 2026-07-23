@@ -103,10 +103,8 @@ public class FatturaService {
             }
 
             // Data
-            if (anno != null) {
-                LocalDate inizioAnno = LocalDate.of(anno, 1, 1);
-                LocalDate fineAnno = LocalDate.of(anno, 12, 31);
-                predicates.add(criteriaBuilder.between(root.get("data"), inizioAnno, fineAnno));
+            if (data != null) {
+                predicates.add(criteriaBuilder.equal(root.get("data"), data));
             }
 
             // Anno
