@@ -30,10 +30,7 @@ public record ClienteDTO(
         @NotBlank(message = "Il telefono è obbligatorio")
         String telefono,
 
-        @NotNull(message = "La data di inserimento è obbligatoria")
         LocalDate dataInserimento,
-
-        @NotNull(message = "La data dell'ultimo contatto è obbligatoria")
         LocalDate dataUltimoContatto,
 
         @NotNull(message = "Il fatturato annuale è obbligatorio")
